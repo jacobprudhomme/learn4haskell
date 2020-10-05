@@ -634,9 +634,8 @@ specifying complex expressions.
 -}
 sumLast2 :: Int -> Int
 sumLast2 n =
-  let lastDig = (abs n) `mod` 10
-      lastTwoDigs = (abs n) `mod` 100
-      secondLastDig = (lastTwoDigs - lastDig) `div` 10
+  let lastTwoDigs = abs n `mod` 100
+      (lastDig, secondLastDig) = lastTwoDigs `divMod` 10
   in lastDig + secondLastDig
 
 
