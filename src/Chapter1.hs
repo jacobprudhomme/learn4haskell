@@ -658,10 +658,12 @@ You need to use recursion in this task. Feel free to return to it later, if you
 aren't ready for this boss yet!
 -}
 firstDigit :: Int -> Int
-firstDigit n
-  | absN `div` 10 == 0 = absN
-  | otherwise = firstDigit (absN `div` 10)
-  where absN = abs n
+firstDigit m = getFirstDigit (abs m)
+  where
+    getFirstDigit :: Int -> Int
+    getFirstDigit n
+      | n `div` 10 == 0 = n
+      | otherwise = firstDigit (n `div` 10)
 
 
 {-
