@@ -518,25 +518,23 @@ After defining the city, implement the following functions:
    complicated task, walls can be built only if the city has a castle
    and at least 10 living __people__ inside in all houses of the city totally.
 -}
-data Castle = Castle { castleName :: String }
-
-data Wall = Wall | NoWall
+data Castle
+  = Castle String
+  | CastleWithWall String
+  | NoCastle
 
 data EducationCentre = Church | Library
 
 data House = OnePerson | TwoPerson | ThreePerson | FourPerson
 
-data City
-  = CityWithCastle Castle Wall EducationCentre [House]
-  | CityWithoutCastle EducationCentre [House]
+data City = City Castle EducationCentre [House]
 
 buildCastle :: City -> String -> City
-buildCastle (CityWithCastle _ w ec lh) name = CityWithCastle (Castle name) w ec lh
-buildCastle (CityWithoutCastle ec lh) name = CityWithCastle (Castle name) NoWall ec lh
+buildCastle (City (CastleWithWall _) ec lh) name = City (CastleWithWall name) ec lh
+buildCastle (City _ ec lh) name = City (Castle name) ec lh
 
 buildHouse :: City -> House -> City
-buildHouse (CityWithCastle c w ec lh) house = CityWithCastle c w ec (house:lh)
-buildHouse (CityWithoutCastle ec lh) house = CityWithoutCastle ec (house:lh)
+buildHouse (City c ec lh) house = City c ec (house:lh)
 
 numOccupants :: House -> Int
 numOccupants OnePerson = 1
@@ -545,9 +543,9 @@ numOccupants ThreePerson = 3
 numOccupants FourPerson = 4
 
 buildWalls :: City -> City
-buildWalls (CityWithCastle c NoWall ec lh)
-  | sum (map numOccupants lh) >= 10 = CityWithCastle c Wall ec lh
-  | otherwise = CityWithCastle c NoWall ec lh
+buildWalls (City (Castle name) ec lh)
+  | sum (map numOccupants lh) >= 10 = City (CastleWithWall name) ec lh
+  | otherwise = City (Castle name) ec lh
 buildWalls city = city
 
 {-
