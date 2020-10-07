@@ -1131,19 +1131,15 @@ properties using typeclasses, but they are different data types in the end.
 Implement data types and typeclasses, describing such a battle between two
 contestants, and write a function that decides the outcome of a fight!
 -}
-newtype Health' = Health' { getHealth' :: Int }
-newtype Attack' = Attack' { getAttack' :: Int }
-newtype Defense' = Defense' { getDefense' :: Int }
-
 data Monster' = Monster'
-  { monsterHealth' :: Health'
-  , monsterAttack' :: Attack'
+  { monsterHealth' :: Health
+  , monsterAttack' :: Attack
   }
 
 data Knight' = Knight'
-  { knightHealth' :: Health'
-  , knightAttack' :: Attack'
-  , knightDefense' :: Defense'
+  { knightHealth' :: Health
+  , knightAttack' :: Attack
+  , knightDefense' :: Defense
   }
 
 class Fighter a where
