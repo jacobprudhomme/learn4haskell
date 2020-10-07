@@ -828,7 +828,7 @@ parametrise data types in places where values can be of any general type.
 🕯 HINT: 'Maybe' that some standard types we mentioned above are useful for
   maybe-treasure ;)
 -}
-data Dragon a = Dragon { dragonMagicalPower :: a }
+newtype Dragon a = Dragon { dragonMagicalPower :: a }
 
 data TreasureChest x = TreasureChest
   { treasureChestGold :: Int
