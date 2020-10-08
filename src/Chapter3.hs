@@ -1142,13 +1142,15 @@ data Knight' = Knight'
   , knightDefense' :: Defense
   }
 
+data Command = Fight | Potion | Spell | Run deriving Eq
+
 class Fighter a where
   fAttack :: a -> Int
   fHealth :: a -> Int
   fReplaceHealth :: a -> Int -> a
   fDefense :: a -> Int
   fReplaceDefense :: a -> Int -> a
-  fFight :: Fighter b => a -> b -> String -> (a, b)
+  fFight :: Fighter b => a -> b -> Command -> (a, b)
 
 instance Fighter Monster' where
   fAttack :: Monster' -> Int
@@ -1166,8 +1168,8 @@ instance Fighter Monster' where
   fReplaceDefense :: Monster' -> Int -> Monster'
   fReplaceDefense m _ = m
 
-  fFight :: Fighter b => Monster' -> b -> String -> (Monster', b)
-  fFight attacker defender "attack" =
+  fFight :: Fighter b => Monster' -> b -> Command -> (Monster', b)
+  fFight attacker defender Fight =
     let attack = fAttack attacker
         health = fHealth defender
         defenseMult = 1 - (fromIntegral (fDefense defender)) / 100 :: Double
@@ -1190,25 +1192,25 @@ instance Fighter Knight' where
   fReplaceDefense :: Knight' -> Int -> Knight'
   fReplaceDefense k d = k{ knightDefense' = Defense (min d 100) }
 
-  fFight :: Fighter b => Knight' -> b -> String -> (Knight', b)
-  fFight attacker defender "attack" =
+  fFight :: Fighter b => Knight' -> b -> Command -> (Knight', b)
+  fFight attacker defender Fight =
     let attack = fAttack attacker
         health = fHealth defender
         defenseMult = 1 - (fromIntegral (fDefense defender)) / 100 :: Double
         newHealth = health - round (fromIntegral attack * defenseMult)
     in (attacker, fReplaceHealth defender newHealth)
-  fFight attacker defender "potion" =
+  fFight attacker defender Potion =
     let newHealth = fHealth attacker + 15
     in (fReplaceHealth attacker newHealth, defender)
-  fFight attacker defender "spell" =
+  fFight attacker defender Spell =
     let newDefense = fDefense attacker + 5
     in (fReplaceDefense attacker newDefense, defender)
 
-doFight :: (Fighter a, Fighter b) => a -> [String] -> b -> [String] -> (a, b)
+doFight :: (Fighter a, Fighter b) => a -> [Command] -> b -> [Command] -> (a, b)
 doFight fighter1 (action1:actions1) fighter2 (action2:actions2)
   | fHealth fighter1 == 0 || fHealth fighter2 == 0 = (fighter1, fighter2)
-  | action1 == "run" = (fighter1, fighter2)
-  | action2 == "run" =
+  | action1 == Run = (fighter1, fighter2)
+  | action2 == Run =
     let (fighter1', fighter2') = fFight fighter1 fighter2 action1
     in (fighter1', fighter2')
   | otherwise =
