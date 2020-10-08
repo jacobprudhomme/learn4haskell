@@ -1173,7 +1173,6 @@ instance Fighter Monster' where
         defenseMult = 1 - (fromIntegral (fDefense defender)) / 100 :: Double
         newHealth = health - round (fromIntegral attack * defenseMult)
     in (attacker, fReplaceHealth defender newHealth)
-  fFight attacker defender "run" = (attacker, defender)
 
 instance Fighter Knight' where
   fAttack :: Knight' -> Int
@@ -1208,6 +1207,10 @@ instance Fighter Knight' where
 doFight :: (Fighter a, Fighter b) => a -> [String] -> b -> [String] -> (a, b)
 doFight fighter1 (action1:actions1) fighter2 (action2:actions2)
   | fHealth fighter1 == 0 || fHealth fighter2 == 0 = (fighter1, fighter2)
+  | action1 == "run" = (fighter1, fighter2)
+  | action2 == "run" =
+    let (fighter1', fighter2') = fFight fighter1 fighter2 action1
+    in (fighter1', fighter2')
   | otherwise =
     let (fighter1', fighter2') = fFight fighter1 fighter2 action1
         (fighter2'', fighter1'') = fFight fighter2' fighter1' action2
