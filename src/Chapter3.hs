@@ -1205,8 +1205,13 @@ instance Fighter Knight' where
     let newDefense = fDefense attacker + 5
     in (fReplaceDefense attacker newDefense, defender)
 
-doFight :: (Fighter a, Fighter b) => a -> b -> (a, b)
-doFight fighter1 fighter2 = undefined
+doFight :: (Fighter a, Fighter b) => a -> [String] -> b -> [String] -> (a, b)
+doFight fighter1 (action1:actions1) fighter2 (action2:actions2)
+  | fHealth fighter1 == 0 || fHealth fighter2 == 0 = (fighter1, fighter2)
+  | otherwise =
+    let (fighter1', fighter2') = fFight fighter1 fighter2 action1
+        (fighter2'', fighter1'') = fFight fighter2' fighter1' action2
+    in doFight fighter1'' actions1 fighter2'' actions2
 
 {-
 You did it! Now it is time to the open pull request with your changes
