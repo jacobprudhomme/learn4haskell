@@ -496,8 +496,7 @@ Implement the 'Applicative' instance for our 'List' type.
   type.
 -}
 appendLists :: List a -> List a -> List a
-appendLists Empty Empty = Empty
-appendLists Empty (Cons y ys) = Cons y (appendLists Empty ys)
+appendLists Empty ys = ys
 appendLists (Cons x xs) ys = Cons x (appendLists xs ys)
 
 instance Applicative List where
