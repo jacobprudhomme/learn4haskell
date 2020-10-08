@@ -1143,7 +1143,67 @@ data Knight' = Knight'
   }
 
 class Fighter a where
-  fight' :: a -> b -> String -> (a, b)
+  fAttack :: a -> Int
+  fHealth :: a -> Int
+  fReplaceHealth :: a -> Int -> a
+  fDefense :: a -> Int
+  fReplaceDefense :: a -> Int -> a
+  fFight :: Fighter b => a -> b -> String -> (a, b)
+
+instance Fighter Monster' where
+  fAttack :: Monster' -> Int
+  fAttack (Monster' _ ma) = getAttack ma
+
+  fHealth :: Monster' -> Int
+  fHealth (Monster' mh _) = getHealth mh
+
+  fReplaceHealth :: Monster' -> Int -> Monster'
+  fReplaceHealth m h = m{ monsterHealth' = Health (min h 100) }
+
+  fDefense :: Monster' -> Int
+  fDefense _ = 0
+
+  fReplaceDefense :: Monster' -> Int -> Monster'
+  fReplaceDefense m _ = m
+
+  fFight :: Fighter b => Monster' -> b -> String -> (Monster', b)
+  fFight attacker defender "attack" =
+    let attack = fAttack attacker
+        health = fHealth defender
+        defenseMult = 1 - (fromIntegral (fDefense defender)) / 100 :: Double
+        newHealth = health - round (fromIntegral attack * defenseMult)
+    in (attacker, fReplaceHealth defender newHealth)
+  fFight attacker defender "run" = (attacker, defender)
+
+instance Fighter Knight' where
+  fAttack :: Knight' -> Int
+  fAttack (Knight' _ ka _) = getAttack ka
+
+  fHealth :: Knight' -> Int
+  fHealth (Knight' kh _ _) = getHealth kh
+
+  fReplaceHealth :: Knight' -> Int -> Knight'
+  fReplaceHealth k h = k{ knightHealth' = Health (min h 100) }
+
+  fDefense :: Knight' -> Int
+  fDefense (Knight' _ _ kd) = getDefense kd
+
+  fReplaceDefense :: Knight' -> Int -> Knight'
+  fReplaceDefense k d = k{ knightDefense' = Defense (min d 100) }
+
+  fFight :: Fighter b => Knight' -> b -> String -> (Knight', b)
+  fFight attacker defender "attack" =
+    let attack = fAttack attacker
+        health = fHealth defender
+        defenseMult = 1 - (fromIntegral (fDefense defender)) / 100 :: Double
+        newHealth = health - round (fromIntegral attack * defenseMult)
+    in (attacker, fReplaceHealth defender newHealth)
+  fFight attacker defender "potion" =
+    let newHealth = fHealth attacker + 15
+    in (fReplaceHealth attacker newHealth, defender)
+  fFight attacker defender "spell" =
+    let newDefense = fDefense attacker + 5
+    in (fReplaceDefense attacker newDefense, defender)
 
 doFight :: (Fighter a, Fighter b) => a -> b -> (a, b)
 doFight fighter1 fighter2 = undefined
