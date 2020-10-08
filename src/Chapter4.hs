@@ -114,23 +114,23 @@ As always, try to guess the output first! And don't forget to insert
 the output in here:
 
 >>> :k Char
-
+Char :: *
 >>> :k Bool
-
+Bool :: *
 >>> :k [Int]
-
+[Int] :: *
 >>> :k []
-
+[] :: * -> *
 >>> :k (->)
-
+(->) :: * -> * -> *
 >>> :k Either
-
+Either :: * -> * -> *
 >>> data Trinity a b c = MkTrinity a b c
 >>> :k Trinity
-
+Trinity :: * -> * -> * -> *
 >>> data IntBox f = MkIntBox (f Int)
 >>> :k IntBox
-
+IntBox :: (* -> *) -> *
 -}
 
 {- |
@@ -293,7 +293,8 @@ values and apply them to the type level?
 -}
 instance Functor (Secret e) where
     fmap :: (a -> b) -> Secret e a -> Secret e b
-    fmap = error "fmap for Box: not implemented!"
+    fmap _ (Trap e) = Trap e
+    fmap f (Reward a) = Reward (f a)
 
 {- |
 =⚔️= Task 3
@@ -306,6 +307,11 @@ typeclasses for standard data types.
 data List a
     = Empty
     | Cons a (List a)
+
+instance Functor List where
+  fmap :: (a -> b) -> List a -> List b
+  fmap _ Empty = Empty
+  fmap f (Cons x xs) = Cons (f x) (fmap f xs)
 
 {- |
 =🛡= Applicative
@@ -472,10 +478,11 @@ Implement the Applicative instance for our 'Secret' data type from before.
 -}
 instance Applicative (Secret e) where
     pure :: a -> Secret e a
-    pure = error "pure Secret: Not implemented!"
+    pure = Reward
 
     (<*>) :: Secret e (a -> b) -> Secret e a -> Secret e b
-    (<*>) = error "(<*>) Secret: Not implemented!"
+    (<*>) (Trap e) _ = Trap e
+    (<*>) (Reward f) x = fmap f x
 
 {- |
 =⚔️= Task 5
@@ -488,7 +495,17 @@ Implement the 'Applicative' instance for our 'List' type.
   may also need to implement a few useful helper functions for our List
   type.
 -}
+appendLists :: List a -> List a -> List a
+appendLists Empty ys = ys
+appendLists (Cons x xs) ys = Cons x (appendLists xs ys)
 
+instance Applicative List where
+  pure :: a -> List a
+  pure x = Cons x Empty
+
+  (<*>) :: List (a -> b) -> List a -> List b
+  (<*>) Empty _ = Empty
+  (<*>) (Cons f fs) xs = appendLists (fmap f xs) (fs <*> xs)
 
 {- |
 =🛡= Monad
@@ -600,7 +617,8 @@ Implement the 'Monad' instance for our 'Secret' type.
 -}
 instance Monad (Secret e) where
     (>>=) :: Secret e a -> (a -> Secret e b) -> Secret e b
-    (>>=) = error "bind Secret: Not implemented!"
+    (>>=) (Trap e) _ = Trap e
+    (>>=) (Reward x) f = f x
 
 {- |
 =⚔️= Task 7
@@ -610,7 +628,14 @@ Implement the 'Monad' instance for our lists.
 🕯 HINT: You probably will need to implement a helper function (or
   maybe a few) to flatten lists of lists to a single list.
 -}
+flattenList :: List (List a) -> List a
+flattenList Empty = Empty
+flattenList (Cons x xs) = appendLists x (flattenList xs)
 
+instance Monad List where
+  (>>=) :: List a -> (a -> List b) -> List b
+  (>>=) Empty _ = Empty
+  (>>=) xs f = flattenList (fmap f xs)
 
 {- |
 =💣= Task 8*: Before the Final Boss
@@ -629,7 +654,7 @@ Can you implement a monad version of AND, polymorphic over any monad?
 🕯 HINT: Use "(>>=)", "pure" and anonymous function
 -}
 andM :: (Monad m) => m Bool -> m Bool -> m Bool
-andM = error "andM: Not implemented!"
+andM b1 b2 = b1 >>= (\b -> if b then b2 else pure False)
 
 {- |
 =🐉= Task 9*: Final Dungeon Boss
@@ -672,7 +697,31 @@ Specifically,
    subtree of a tree
  ❃ Implement the function to convert Tree to list
 -}
+data Tree a
+  = NoNode
+  | Node a (Tree a) (Tree a)
+  deriving Show
 
+instance Functor Tree where
+  fmap :: (a -> b) -> Tree a -> Tree b
+  fmap _ NoNode = NoNode
+  fmap f (Node x lt rt) = Node (f x) (fmap f lt) (fmap f rt)
+
+reverseTree :: Tree a -> Tree a
+reverseTree NoNode = NoNode
+reverseTree (Node x lt rt) = Node x (reverseTree rt) (reverseTree lt)
+
+treeToPreorderList :: Tree a -> [a]
+treeToPreorderList NoNode = []
+treeToPreorderList (Node x lt rt) = x : (treeToPreorderList lt ++ treeToPreorderList rt)
+
+treeToInorderList :: Tree a -> [a]
+treeToInorderList NoNode = []
+treeToInorderList (Node x lt rt) = treeToInorderList lt ++ [x] ++ treeToInorderList rt
+
+treeToPostorderList :: Tree a -> [a]
+treeToPostorderList NoNode = []
+treeToPostorderList (Node x lt rt) = treeToPostorderList lt ++ treeToPostorderList rt ++ [x]
 
 {-
 You did it! Now it is time to the open pull request with your changes
