@@ -1207,12 +1207,12 @@ instance Fighter Knight' where
     in (fReplaceDefense attacker newDefense, defender)
 
 doFight :: (Fighter a, Fighter b) => a -> [Command] -> b -> [Command] -> (a, b)
+doFight fighter1 (Run:_) fighter2 _ = (fighter1, fighter2)
+doFight fighter1 (action1:_) fighter2 (Run:_) =
+  let (fighter1', fighter2') = fFight fighter1 fighter2 action1
+  in (fighter1', fighter2')
 doFight fighter1 (action1:actions1) fighter2 (action2:actions2)
   | fHealth fighter1 == 0 || fHealth fighter2 == 0 = (fighter1, fighter2)
-  | action1 == Run = (fighter1, fighter2)
-  | action2 == Run =
-    let (fighter1', fighter2') = fFight fighter1 fighter2 action1
-    in (fighter1', fighter2')
   | otherwise =
     let (fighter1', fighter2') = fFight fighter1 fighter2 action1
         (fighter2'', fighter1'') = fFight fighter2' fighter1' action2
