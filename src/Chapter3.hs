@@ -1214,7 +1214,9 @@ doFight fighter1 (action1:actions1) fighter2 (action2:actions2)
   | otherwise =
     let (fighter1', fighter2') = fFight fighter1 fighter2 action1
         (fighter2'', fighter1'') = fFight fighter2' fighter1' action2
-    in doFight fighter1'' actions1 fighter2'' actions2
+    in if fHealth fighter1' == 0 || fHealth fighter2' == 0
+      then (fighter1', fighter2')
+      else doFight fighter1'' actions1 fighter2'' actions2
 
 {-
 You did it! Now it is time to the open pull request with your changes
