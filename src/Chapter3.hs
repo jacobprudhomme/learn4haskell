@@ -1158,7 +1158,7 @@ instance Fighter Monster' where
   fHealth (Monster' mh _) = getHealth mh
 
   fReplaceHealth :: Monster' -> Int -> Monster'
-  fReplaceHealth m h = m{ monsterHealth' = Health (min h 100) }
+  fReplaceHealth m h = m{ monsterHealth' = Health (max (min h 100) 0) }
 
   fDefense :: Monster' -> Int
   fDefense _ = 0
@@ -1182,7 +1182,7 @@ instance Fighter Knight' where
   fHealth (Knight' kh _ _) = getHealth kh
 
   fReplaceHealth :: Knight' -> Int -> Knight'
-  fReplaceHealth k h = k{ knightHealth' = Health (min h 100) }
+  fReplaceHealth k h = k{ knightHealth' = Health (max (min h 100) 0) }
 
   fDefense :: Knight' -> Int
   fDefense (Knight' _ _ kd) = getDefense kd
