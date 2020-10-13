@@ -724,6 +724,6 @@ treeToPostorderList NoNode = []
 treeToPostorderList (Node x lt rt) = treeToPostorderList lt ++ treeToPostorderList rt ++ [x]
 
 {-
-You did it! Now it is time to the open pull request with your changes
+You did it! Now it is time to open pull request with your changes
 and summon @vrom911 and @chshersh for the review!
 -}

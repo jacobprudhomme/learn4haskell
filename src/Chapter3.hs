@@ -1221,7 +1221,7 @@ doFight fighter1 (action1:actions1) fighter2 (action2:actions2)
       else doFight fighter1'' actions1 fighter2'' actions2
 
 {-
-You did it! Now it is time to the open pull request with your changes
+You did it! Now it is time to open pull request with your changes
 and summon @vrom911 and @chshersh for the review!
 -}
 
